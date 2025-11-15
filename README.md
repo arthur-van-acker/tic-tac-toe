@@ -231,23 +231,28 @@ For technical details, see [INSTALLATION-TECHNICAL-DETAILS.md](docs/INSTALLATION
 
 ---
 
-## 🧪 Testing
+## 🧪 Testing & Quality
 
-```bash
-# Run all tests
-pytest
+- Tests enforce a **minimum 50% coverage** (measured automatically via `pytest`).
+- GUI tests run in headless mode by default (set `TICTACTOE_HEADLESS=1`).
+- GitHub Actions runs the same commands plus a release smoke test on every push/PR.
 
-# Run without GUI (default for CI/headless machines)
-pytest -m "not gui"
+```pwsh
+# Run the default non-GUI suite with coverage
+python -m pytest -m "not gui"
 
-# Run GUI-only suite (requires display)
-pytest -m gui
+# Run only the GUI smoke tests (requires Tk runtime unless headless)
+python -m pytest -m gui
 
-# Run with coverage
-pytest --cov=tictactoe --cov-report=term
+# Formatting and linting
+python -m black --check src tests
+python -m ruff check src tests
 
-# Run specific test file
-pytest tests/test_logic.py
+# Static type checking
+python -m mypy src
+
+# Full tox automation (lint + type + tests)
+python -m tox -e lint,type,py313
 ```
 
 ---
