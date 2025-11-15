@@ -1,9 +1,31 @@
 """GUI implementation for Tic Tac Toe using CustomTkinter."""
 
-import customtkinter as ctk
 from pathlib import Path
+import os
 import sys
+from tkinter import TclError
+
 from tictactoe.domain.logic import TicTacToe, GameState
+
+
+def _load_customtkinter(force_headless: bool = False):
+    """Load CustomTkinter or fall back to headless stubs."""
+    if force_headless or os.environ.get("TICTACTOE_HEADLESS") == "1":
+        from tictactoe.ui.gui import headless as headless_ctk
+
+        return headless_ctk, True
+
+    try:
+        import customtkinter as real_ctk
+
+        return real_ctk, False
+    except Exception:
+        from tictactoe.ui.gui import headless as headless_ctk
+
+        return headless_ctk, True
+
+
+ctk, IS_HEADLESS = _load_customtkinter()
 
 # Fix taskbar icon on Windows
 import platform
@@ -22,9 +44,9 @@ class TicTacToeGUI:
     def __init__(self):
         """Initialize the GUI application."""
         self.game = TicTacToe()
+        self._ctk_headless = IS_HEADLESS
+        self.root = self._create_root()
         
-        # Create main window
-        self.root = ctk.CTk()
         self.root.title("Tic Tac Toe")
         self.root.geometry("400x600")
         self.root.resizable(False, False)
@@ -41,7 +63,7 @@ class TicTacToeGUI:
                 self.icon_path = path
                 break
         
-        if self.icon_path:
+        if self.icon_path and not self._ctk_headless:
             try:
                 # Set icon for window and taskbar
                 self.root.iconbitmap(default=str(self.icon_path))
@@ -57,6 +79,18 @@ class TicTacToeGUI:
         # Create UI elements
         self._create_widgets()
         
+    def _create_root(self):
+        """Create the root window with fallback to headless widgets."""
+        global ctk, IS_HEADLESS
+        try:
+            return ctk.CTk()
+        except TclError:
+            if not IS_HEADLESS:
+                ctk, IS_HEADLESS = _load_customtkinter(force_headless=True)
+                self._ctk_headless = True
+                return ctk.CTk()
+            raise
+
     def _create_widgets(self):
         """Create all GUI widgets."""
         # Title
@@ -143,7 +177,8 @@ class TicTacToeGUI:
     def run(self):
         """Start the GUI application."""
         # Set icon after everything is initialized (CustomTkinter workaround)
-        if hasattr(self, 'icon_path') and self.icon_path.exists():
+        if (hasattr(self, 'icon_path') and self.icon_path and
+                self.icon_path.exists() and not self._ctk_headless):
             try:
                 # Access the underlying Tkinter window
                 self.root.after(10, lambda: self.root.iconbitmap(str(self.icon_path)))

@@ -9,6 +9,8 @@ import pytest
 
 from tkinter import TclError
 
+os.environ.setdefault("TICTACTOE_HEADLESS", "1")
+
 from tictactoe.domain.logic import GameState
 from tictactoe.ui.gui.main import TicTacToeGUI
 
