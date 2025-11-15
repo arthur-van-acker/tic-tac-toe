@@ -1,7 +1,8 @@
 """Game logic for Tic Tac Toe."""
 
+from dataclasses import dataclass
 from enum import Enum
-from typing import Optional
+from typing import Callable, Optional
 
 
 class Player(Enum):
@@ -20,14 +21,51 @@ class GameState(Enum):
     DRAW = "draw"
 
 
+@dataclass(frozen=True)
+class GameSnapshot:
+    """Immutable view of the current game state."""
+
+    board: tuple[Optional["Player"], ...]
+    current_player: "Player"
+    state: "GameState"
+    winner: Optional["Player"]
+
+
 class TicTacToe:
     """Main game logic for Tic Tac Toe."""
 
     def __init__(self):
         """Initialize a new game."""
-        self.board: list[Optional[Player]] = [None] * 9
-        self.current_player = Player.X
-        self.state = GameState.PLAYING
+        self._listeners: list[Callable[[GameSnapshot], None]] = []
+        self.reset()
+
+    def add_listener(self, listener: Callable[[GameSnapshot], None]) -> None:
+        """Register a callback to be invoked whenever the game state changes."""
+
+        self._listeners.append(listener)
+
+    def remove_listener(self, listener: Callable[[GameSnapshot], None]) -> None:
+        """Remove a previously registered listener."""
+
+        if listener in self._listeners:
+            self._listeners.remove(listener)
+
+    @property
+    def board(self) -> tuple[Optional[Player], ...]:
+        """Return an immutable view of the board."""
+
+        return tuple(self._board)
+
+    @property
+    def snapshot(self) -> GameSnapshot:
+        """Return a snapshot that summarizes the current game state."""
+
+        return GameSnapshot(
+            board=self.board,
+            current_player=self.current_player,
+            state=self.state,
+            winner=self.get_winner(),
+        )
 
     def make_move(self, position: int) -> bool:
         """
@@ -45,16 +83,18 @@ class TicTacToe:
         if position < 0 or position > 8:
             return False
 
-        if self.board[position] is not None:
+        if self._board[position] is not None:
             return False
 
-        self.board[position] = self.current_player
+        self._board[position] = self.current_player
         self._check_game_state()
 
         if self.state == GameState.PLAYING:
             self.current_player = (
                 Player.O if self.current_player == Player.X else Player.X
             )
+
+        self._notify_listeners()
 
         return True
 
@@ -63,53 +103,54 @@ class TicTacToe:
         # Check rows
         for i in range(0, 9, 3):
             if (
-                self.board[i] is not None
-                and self.board[i] == self.board[i + 1] == self.board[i + 2]
+                self._board[i] is not None
+                and self._board[i] == self._board[i + 1] == self._board[i + 2]
             ):
                 self.state = (
-                    GameState.X_WON if self.board[i] == Player.X else GameState.O_WON
+                    GameState.X_WON if self._board[i] == Player.X else GameState.O_WON
                 )
                 return
 
         # Check columns
         for i in range(3):
             if (
-                self.board[i] is not None
-                and self.board[i] == self.board[i + 3] == self.board[i + 6]
+                self._board[i] is not None
+                and self._board[i] == self._board[i + 3] == self._board[i + 6]
             ):
                 self.state = (
-                    GameState.X_WON if self.board[i] == Player.X else GameState.O_WON
+                    GameState.X_WON if self._board[i] == Player.X else GameState.O_WON
                 )
                 return
 
         # Check diagonals
         if (
-            self.board[0] is not None
-            and self.board[0] == self.board[4] == self.board[8]
+            self._board[0] is not None
+            and self._board[0] == self._board[4] == self._board[8]
         ):
             self.state = (
-                GameState.X_WON if self.board[0] == Player.X else GameState.O_WON
+                GameState.X_WON if self._board[0] == Player.X else GameState.O_WON
             )
             return
 
         if (
-            self.board[2] is not None
-            and self.board[2] == self.board[4] == self.board[6]
+            self._board[2] is not None
+            and self._board[2] == self._board[4] == self._board[6]
         ):
             self.state = (
-                GameState.X_WON if self.board[2] == Player.X else GameState.O_WON
+                GameState.X_WON if self._board[2] == Player.X else GameState.O_WON
             )
             return
 
         # Check for draw
-        if all(cell is not None for cell in self.board):
+        if all(cell is not None for cell in self._board):
             self.state = GameState.DRAW
 
     def reset(self) -> None:
         """Reset the game to initial state."""
-        self.board = [None] * 9
+        self._board = [None] * 9
         self.current_player = Player.X
         self.state = GameState.PLAYING
+        self._notify_listeners()
 
     def get_winner(self) -> Optional[Player]:
         """Get the winning player if any."""
@@ -118,3 +159,13 @@ class TicTacToe:
         elif self.state == GameState.O_WON:
             return Player.O
         return None
+
+    def _notify_listeners(self) -> None:
+        """Notify all registered listeners of the latest snapshot."""
+
+        if not self._listeners:
+            return
+
+        snapshot = self.snapshot
+        for listener in list(self._listeners):
+            listener(snapshot)

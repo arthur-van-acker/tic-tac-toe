@@ -6,7 +6,7 @@ import sys
 from pathlib import Path
 from tkinter import TclError
 
-from tictactoe.domain.logic import GameState, TicTacToe
+from tictactoe.domain.logic import GameSnapshot, GameState, TicTacToe
 
 
 def _load_customtkinter(force_headless: bool = False):
@@ -88,6 +88,8 @@ class TicTacToeGUI:
 
         # Create UI elements
         self._create_widgets()
+        self.game.add_listener(self._on_game_updated)
+        self._on_game_updated(self.game.snapshot)
 
     def _create_root(self):
         """Create the root window with fallback to headless widgets."""
@@ -112,7 +114,7 @@ class TicTacToeGUI:
         # Status label
         self.status_label = ctk.CTkLabel(
             self.root,
-            text=f"Player {self.game.current_player.value}'s turn",
+            text="",
             font=ctk.CTkFont(size=20),
         )
         self.status_label.pack(pady=10)
@@ -149,37 +151,35 @@ class TicTacToeGUI:
 
     def _on_cell_click(self, position: int):
         """Handle cell button click."""
-        if self.game.make_move(position):
-            # Update button text
-            self.buttons[position].configure(
-                text=self.game.board[position].value, state="disabled"
-            )
+        self.game.make_move(position)
 
-            # Update status
-            self._update_status()
+    def _on_game_updated(self, snapshot: GameSnapshot) -> None:
+        """Render the latest game snapshot to the UI widgets."""
 
-    def _update_status(self):
-        """Update the status label based on game state."""
-        if self.game.state == GameState.PLAYING:
+        if not hasattr(self, "buttons"):
+            return
+
+        for position, button in enumerate(self.buttons):
+            cell = snapshot.board[position]
+            if cell is None:
+                button.configure(text="", state="normal")
+            else:
+                button.configure(text=cell.value, state="disabled")
+
+        if snapshot.state == GameState.PLAYING:
             self.status_label.configure(
-                text=f"Player {self.game.current_player.value}'s turn"
+                text=f"Player {snapshot.current_player.value}'s turn"
             )
-        elif self.game.state == GameState.DRAW:
+        elif snapshot.state == GameState.DRAW:
             self.status_label.configure(text="It's a draw!")
         else:
-            winner = self.game.get_winner()
-            self.status_label.configure(text=f"Player {winner.value} wins!")
+            winner = snapshot.winner
+            winner_text = winner.value if winner else "Unknown"
+            self.status_label.configure(text=f"Player {winner_text} wins!")
 
     def _reset_game(self):
         """Reset the game to initial state."""
         self.game.reset()
-
-        # Clear all buttons
-        for button in self.buttons:
-            button.configure(text="", state="normal")
-
-        # Reset status
-        self._update_status()
 
     def run(self):
         """Start the GUI application."""
