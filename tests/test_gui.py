@@ -9,6 +9,7 @@ import pytest
 
 from tkinter import TclError
 
+from tictactoe.domain.logic import GameState
 from tictactoe.ui.gui.main import TicTacToeGUI
 
 
@@ -57,5 +58,35 @@ def test_gui_click_updates_button_and_status():
         assert app.buttons[0].cget("text") == "X"
         assert app.buttons[0].cget("state") == "disabled"
         assert "Player O" in app.status_label.cget("text")
+    finally:
+        app.root.destroy()
+
+
+@pytest.mark.gui
+def test_gui_reset_game_restores_state():
+    app = _create_app_or_skip()
+    try:
+        app._on_cell_click(0)
+        app._on_cell_click(3)
+        app._reset_game()
+
+        for button in app.buttons:
+            assert button.cget("text") == ""
+            assert button.cget("state") == "normal"
+        assert app.game.state == GameState.PLAYING
+        assert "Player X" in app.status_label.cget("text")
+    finally:
+        app.root.destroy()
+
+
+@pytest.mark.gui
+def test_gui_win_updates_status_message():
+    app = _create_app_or_skip()
+    try:
+        for move in (0, 3, 1, 4, 2):
+            app._on_cell_click(move)
+
+        assert app.game.state == GameState.X_WON
+        assert "wins" in app.status_label.cget("text")
     finally:
         app.root.destroy()
