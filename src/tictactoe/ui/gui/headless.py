@@ -58,7 +58,9 @@ class CTk(_Widget):
     def resizable(self, *_: Any) -> None:
         return None
 
-    def iconbitmap(self, *args: Any, **kwargs: Any) -> None:  # pragma: no cover - no behavior
+    def iconbitmap(
+        self, *args: Any, **kwargs: Any
+    ) -> None:  # pragma: no cover - no behavior
         return None
 
     def after(self, _delay: int, callback: Callable[[], None]) -> None:
@@ -77,7 +79,9 @@ class CTkLabel(_Widget):
 
 
 class CTkButton(_Widget):
-    def __init__(self, *args: Any, command: Optional[Callable[[], None]] = None, **kwargs: Any) -> None:
+    def __init__(
+        self, *args: Any, command: Optional[Callable[[], None]] = None, **kwargs: Any
+    ) -> None:
         super().__init__(**kwargs)
         self._command = command
 
@@ -90,5 +94,7 @@ def set_appearance_mode(_mode: str) -> None:  # pragma: no cover - compatibility
     return None
 
 
-def set_default_color_theme(_theme: str) -> None:  # pragma: no cover - compatibility shim
+def set_default_color_theme(
+    _theme: str,
+) -> None:  # pragma: no cover - compatibility shim
     return None

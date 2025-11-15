@@ -1,3 +1,5 @@
 """Configuration module for Tic Tac Toe application."""
 
-__all__ = []
+from typing import List
+
+__all__: List[str] = []

@@ -1,7 +1,5 @@
 """Unit tests for tictactoe.domain.logic."""
 
-import pytest
-
 from tictactoe.domain.logic import GameState, Player, TicTacToe
 
 

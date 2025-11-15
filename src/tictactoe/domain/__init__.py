@@ -1,6 +1,5 @@
 """Domain module containing game logic."""
 
-from .logic import TicTacToe, Player, GameState
+from .logic import GameState, Player, TicTacToe
 
 __all__ = ["TicTacToe", "Player", "GameState"]
-

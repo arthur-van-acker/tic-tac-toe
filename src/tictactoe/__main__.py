@@ -8,7 +8,7 @@ def main():
     # TODO: Add argument parsing for UI selection
     # For now, default to GUI
     from tictactoe.ui.gui.main import main as gui_main
-    
+
     gui_main()
 
 

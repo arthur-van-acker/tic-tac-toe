@@ -6,12 +6,14 @@ from typing import Optional
 
 class Player(Enum):
     """Represents a player in the game."""
+
     X = "X"
-    O = "O"
+    O = "O"  # noqa: E741 - keep single-letter enum for board notation
 
 
 class GameState(Enum):
     """Represents the current state of the game."""
+
     PLAYING = "playing"
     X_WON = "x_won"
     O_WON = "o_won"
@@ -50,7 +52,9 @@ class TicTacToe:
         self._check_game_state()
 
         if self.state == GameState.PLAYING:
-            self.current_player = Player.O if self.current_player == Player.X else Player.X
+            self.current_player = (
+                Player.O if self.current_player == Player.X else Player.X
+            )
 
         return True
 
@@ -58,31 +62,43 @@ class TicTacToe:
         """Check if the game has been won or drawn."""
         # Check rows
         for i in range(0, 9, 3):
-            if (self.board[i] is not None and
-                self.board[i] == self.board[i + 1] == self.board[i + 2]):
-                self.state = (GameState.X_WON if self.board[i] == Player.X 
-                             else GameState.O_WON)
+            if (
+                self.board[i] is not None
+                and self.board[i] == self.board[i + 1] == self.board[i + 2]
+            ):
+                self.state = (
+                    GameState.X_WON if self.board[i] == Player.X else GameState.O_WON
+                )
                 return
 
         # Check columns
         for i in range(3):
-            if (self.board[i] is not None and
-                self.board[i] == self.board[i + 3] == self.board[i + 6]):
-                self.state = (GameState.X_WON if self.board[i] == Player.X 
-                             else GameState.O_WON)
+            if (
+                self.board[i] is not None
+                and self.board[i] == self.board[i + 3] == self.board[i + 6]
+            ):
+                self.state = (
+                    GameState.X_WON if self.board[i] == Player.X else GameState.O_WON
+                )
                 return
 
         # Check diagonals
-        if (self.board[0] is not None and
-            self.board[0] == self.board[4] == self.board[8]):
-            self.state = (GameState.X_WON if self.board[0] == Player.X 
-                         else GameState.O_WON)
+        if (
+            self.board[0] is not None
+            and self.board[0] == self.board[4] == self.board[8]
+        ):
+            self.state = (
+                GameState.X_WON if self.board[0] == Player.X else GameState.O_WON
+            )
             return
 
-        if (self.board[2] is not None and
-            self.board[2] == self.board[4] == self.board[6]):
-            self.state = (GameState.X_WON if self.board[2] == Player.X 
-                         else GameState.O_WON)
+        if (
+            self.board[2] is not None
+            and self.board[2] == self.board[4] == self.board[6]
+        ):
+            self.state = (
+                GameState.X_WON if self.board[2] == Player.X else GameState.O_WON
+            )
             return
 
         # Check for draw
