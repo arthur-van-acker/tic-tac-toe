@@ -5,5 +5,7 @@ darkdetect==0.8.0
 packaging==25.0
 pillow==12.0.0
 pyproject_hooks==1.2.0
+pytest==8.3.3
+pytest-cov==5.0.0
 # Editable install with no version control (tictactoe==0.1.0)
--e d:\gui\custom-tkinter\tic-tac-toe
+-e .

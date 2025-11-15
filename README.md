@@ -237,8 +237,14 @@ For technical details, see [INSTALLATION-TECHNICAL-DETAILS.md](docs/INSTALLATION
 # Run all tests
 pytest
 
+# Run without GUI (default for CI/headless machines)
+pytest -m "not gui"
+
+# Run GUI-only suite (requires display)
+pytest -m gui
+
 # Run with coverage
-pytest --cov=tictactoe
+pytest --cov=tictactoe --cov-report=term
 
 # Run specific test file
 pytest tests/test_logic.py
