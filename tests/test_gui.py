@@ -7,6 +7,8 @@ import platform
 
 import pytest
 
+from tkinter import TclError
+
 from tictactoe.ui.gui.main import TicTacToeGUI
 
 
@@ -18,10 +20,19 @@ def _skip_if_no_display() -> None:
         pytest.skip("GUI tests require a display")
 
 
+def _create_app_or_skip() -> TicTacToeGUI:
+    _skip_if_no_display()
+    try:
+        return TicTacToeGUI()
+    except TclError as exc:
+        if "tcl_findLibrary" in str(exc):
+            pytest.skip("Tk runtime is unavailable in this environment")
+        raise
+
+
 @pytest.mark.gui
 def test_gui_initializes_widgets():
-    _skip_if_no_display()
-    app = TicTacToeGUI()
+    app = _create_app_or_skip()
     try:
         assert len(app.buttons) == 9
         assert "Player X" in app.status_label.cget("text")
@@ -32,8 +43,7 @@ def test_gui_initializes_widgets():
 
 @pytest.mark.gui
 def test_gui_click_updates_button_and_status():
-    _skip_if_no_display()
-    app = TicTacToeGUI()
+    app = _create_app_or_skip()
     try:
         app._on_cell_click(0)
         assert app.buttons[0].cget("text") == "X"
