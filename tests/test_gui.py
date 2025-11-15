@@ -20,12 +20,20 @@ def _skip_if_no_display() -> None:
         pytest.skip("GUI tests require a display")
 
 
+TK_MISSING_PATTERNS = (
+    "tcl_findlibrary",
+    "can't find a usable tk.tcl",
+    "tk wasn't installed properly",
+)
+
+
 def _create_app_or_skip() -> TicTacToeGUI:
     _skip_if_no_display()
     try:
         return TicTacToeGUI()
     except TclError as exc:
-        if "tcl_findLibrary" in str(exc):
+        message = str(exc).lower()
+        if any(pattern in message for pattern in TK_MISSING_PATTERNS):
             pytest.skip("Tk runtime is unavailable in this environment")
         raise
 
