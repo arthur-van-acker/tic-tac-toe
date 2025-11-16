@@ -126,6 +126,44 @@ echo WshShell.Run """%%LOCALAPPDATA%%\Programs\ttt.v0.1.0\.venv\Scripts\pythonw.
 echo Set WshShell = Nothing
 ) > dist\tic-tac-toe-starter.vbs
 
+REM Add license.txt to dist
+(
+echo Tic Tac Toe Template
+echo Copyright (c) 2025 Arthur van Acker
+echo.
+echo Permission to use, copy, modify, and/or distribute this software for any
+echo purpose with or without fee is hereby granted.
+echo.
+echo THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+echo WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+echo MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+echo ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+echo WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+echo ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR
+echo IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+) > dist\license.txt
+
+REM Add how-to-install-me.txt to dist
+(
+echo How to install Tic Tac Toe
+echo ==========================
+echo.
+echo 1. Download the zipped release.
+echo 2. Unzip it anywhere.
+echo 3. Double-click `installation.bat`.
+echo 4. Double-click the Tic Tac Toe desktop shortcut.
+echo.
+echo What the installer does
+echo -----------------------
+echo - Installs the app into %%LOCALAPPDATA%%\Programs\ttt.v0.1.0 so you do not have to pick a folder.
+echo - Creates a fresh virtual environment and installs `tictactoe-0.1.0-py3-none-any.whl`.
+echo - Adds a desktop shortcut that launches `tic-tac-toe-starter.vbs`.
+echo - Shows "Installation complete" when it is done. Use the shortcut to start playing.
+echo - To uninstall, delete %%LOCALAPPDATA%%\Programs\ttt.v0.1.0 and remove the shortcut.
+echo.
+echo Need help? Visit https://github.com/arthur-van-acker/tic-tac-toe/blob/main/docs/INSTALLATION-GUIDE.md for screenshots and troubleshooting tips.
+) > dist\how-to-install-me.txt
+
 echo.
 echo Build complete!
 echo Wheel files, installation script, and starter are in the dist\ folder
