@@ -280,7 +280,7 @@ pre-commit install
 pre-commit install --hook-type pre-push
 ```
 
-- **Commit-time hooks:** enforce formatting, lint rules, and TOML/YAML hygiene.
+- **Commit-time hooks:** enforce formatting, lint rules, TOML/YAML hygiene, and run `python -m pytest -m "not gui"` before the commit is recorded.
 - **Pre-push hooks:** replay `python -m pytest -m "not gui"` plus `python -m tox -e lint,type` (matching the GitHub Actions workflow).
 
 Temporarily bypass hooks with `SKIP=hook-id pre-commit run hook-id` as documented at [pre-commit.com](https://pre-commit.com/), but always rerun the skipped command manually before opening a PR.

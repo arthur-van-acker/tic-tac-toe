@@ -369,7 +369,7 @@ bash scripts/run-ci.sh
 ### Local automation helpers
 
 - `scripts/run-ci.ps1` / `scripts/run-ci.sh` mirror the CI pipeline (dev requirements + editable install + tox lint/type/py313). Run them before every push to catch formatting, typing, or packaging issues locally. Pass `-SkipRequirementsInstall` (PowerShell) or `SKIP_REQUIREMENTS_INSTALL=1` (bash/zsh) if you have already synced dependencies in the current shell.
-- `.pre-commit-config.yaml` wires up Black, Ruff, mypy, and safety checks for file formats. Install once and forget:
+- `.pre-commit-config.yaml` wires up Black, Ruff, mypy, file-format checks, **and now runs `python -m pytest -m "not gui"` both before each commit and push**. Install once and forget:
 
 ```pwsh
 python -m pip install pre-commit
@@ -467,19 +467,19 @@ Potential improvements for this template:
 
 ## ❓ FAQ
 
-**Q: Can I use this for commercial projects?**  
+**Q: Can I use this for commercial projects?**
 A: Yes! MIT License allows commercial use.
 
-**Q: Does this work on Linux/Mac?**  
+**Q: Does this work on Linux/Mac?**
 A: The installer is Windows-specific, but the code runs on any platform. You'd need to create platform-specific installers.
 
-**Q: Can I package this as a standalone .exe?**  
+**Q: Can I package this as a standalone .exe?**
 A: Yes! Use PyInstaller or similar tools. This template focuses on wheel distribution, but .exe packaging is compatible.
 
-**Q: Why not use Qt/wxPython instead of Tkinter?**  
+**Q: Why not use Qt/wxPython instead of Tkinter?**
 A: CustomTkinter provides a modern look with Tkinter's simplicity. Qt/wxPython are great alternatives but have larger dependencies.
 
-**Q: How do I update users to a new version?**  
+**Q: How do I update users to a new version?**
 A: Users just run the new installer - it automatically removes the old version first.
 
 ---

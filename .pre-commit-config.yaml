@@ -28,6 +28,12 @@ repos:
     - types-colorama
 - repo: local
   hooks:
+  - id: pytest-non-gui-commit
+    name: pytest (non-gui suite)
+    entry: python -m pytest -m "not gui"
+    language: system
+    pass_filenames: false
+    stages: [ pre-commit ]
   - id: pytest-non-gui
     name: pytest (non-gui suite)
     entry: python -m pytest -m "not gui"
