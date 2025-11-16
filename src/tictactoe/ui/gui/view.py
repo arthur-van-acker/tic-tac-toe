@@ -2,13 +2,14 @@
 
 from __future__ import annotations
 
-from typing import Callable, Dict, List, Sequence
+from typing import Callable, Dict, Sequence
 
 from tictactoe.config import FontSpec, GameViewConfig
 from tictactoe.domain.logic import GameSnapshot, GameState
+from tictactoe.ui.gui.contracts import CellButton, GameViewPort, ResetControl, SupportsText
 
 
-class GameView:
+class GameView(GameViewPort):
     """Responsible for building and updating the widget tree."""
 
     def __init__(
@@ -26,11 +27,11 @@ class GameView:
         self._on_reset = on_reset
         self.config = view_config or GameViewConfig()
 
-        self.title_label = None
-        self.status_label = None
+        self.title_label: SupportsText | None = None
+        self.status_label: SupportsText | None = None
         self.board_frame = None
-        self.reset_button = None
-        self.buttons: List[object] = []
+        self.reset_button: ResetControl | None = None
+        self.buttons: list[CellButton] = []
         self._built = False
 
     def build(self) -> None:
@@ -111,15 +112,15 @@ class GameView:
 
         return self._built
 
-    def button_count(self) -> int:
+    def cell_count(self) -> int:
         self._ensure_built()
         return len(self.buttons)
 
-    def button_text(self, position: int) -> str:
+    def cell_text(self, position: int) -> str:
         button = self._button_at(position)
         return button.cget("text")
 
-    def button_state(self, position: int) -> str:
+    def cell_state(self, position: int) -> str:
         button = self._button_at(position)
         return button.cget("state")
 
@@ -200,7 +201,22 @@ class GameView:
         if not self._built:
             raise RuntimeError("GameView widgets have not been built yet")
 
-    def _button_at(self, position: int):
+    def button_count(self) -> int:
+        """Backward-compatible alias for cell_count."""
+
+        return self.cell_count()
+
+    def button_text(self, position: int) -> str:
+        """Backward-compatible alias for cell_text."""
+
+        return self.cell_text(position)
+
+    def button_state(self, position: int) -> str:
+        """Backward-compatible alias for cell_state."""
+
+        return self.cell_state(position)
+
+    def _button_at(self, position: int) -> CellButton:
         self._ensure_built()
         if position < 0 or position >= len(self.buttons):
             raise IndexError(position)

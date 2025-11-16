@@ -156,6 +156,25 @@ Setting `TICTACTOE_UI=headless` automatically flips `TICTACTOE_HEADLESS=1`, whic
 useful for CI smoke tests that still exercise the GUI bootstrap path without a Tk
 runtime.
 
+#### Swap the View Adapter
+
+The GUI layer now ships with adapter-friendly contracts so you can choose how the
+widgets are rendered without touching the controller:
+
+```python
+from tictactoe.ui.gui import HeadlessGameView
+from tictactoe.ui.gui.main import TicTacToeGUI
+
+# Exercise the controller and domain logic without CustomTkinter widgets
+app = TicTacToeGUI(view_factory=HeadlessGameView)
+app.run()
+```
+
+`HeadlessGameView` implements the shared `GameViewPort` protocol alongside the
+default `GameView` (CustomTkinter) so template users can bundle their own adapters
+without rewriting `TicTacToeGUI`. The same telemetry helpers (`cell_text`,
+`status_text`, etc.) are available for tests regardless of the adapter in use.
+
 #### Build Distribution
 
 ```bash

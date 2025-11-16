@@ -5,6 +5,7 @@ from typing import Any, Callable, Optional, Protocol
 from tictactoe.config import GameViewConfig, WindowConfig
 from tictactoe.domain.logic import GameSnapshot, TicTacToe
 from tictactoe.ui.gui import bootstrap
+from tictactoe.ui.gui.contracts import GameViewPort
 from tictactoe.ui.gui.theme import apply_default_theme
 from tictactoe.ui.gui.view import GameView
 
@@ -24,7 +25,7 @@ class ViewFactory(Protocol):
         on_cell_click: Callable[[int], None],
         on_reset: Callable[[], None],
         view_config: GameViewConfig,
-    ) -> GameView:
+    ) -> GameViewPort:
         ...
 
 
