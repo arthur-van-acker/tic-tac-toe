@@ -253,111 +253,89 @@ When the user launches the game via the desktop shortcut:
    - Python looks for `tictactoe` package in `.venv\Lib\site-packages\`
 
 ### 5. **Python Module Execution**
-   - Python finds `tictactoe` package
-   - The `-m` flag tells Python to run it as a module
-   - Python executes `tictactoe/__main__.py`
+  - Python finds the `tictactoe` package and executes `tictactoe/__main__.py`
+  - The file now hosts a miniature CLI dispatcher built with `argparse`
+  - Supported switches:
+    - `--ui/--frontend`: choose `gui`, `headless`, or `cli`
+    - `--list-frontends`: print the registry without launching anything
+  - When no CLI flag is given, the dispatcher consults `TICTACTOE_UI` (if set) and falls back to the built-in default (`gui`).
 
-### 6. **Main Entry Point**
-   - `__main__.py` contains:
-     ```python
-     def main():
-         from tictactoe.ui.gui.main import main as gui_main
-         gui_main()
-     
-     if __name__ == "__main__":
-         main()
-     ```
-   - Calls `main()` function
-   - Imports GUI main function
+### 6. **Frontend Registry**
+  - `__main__.py` defines a `FRONTENDS` mapping of `FrontendSpec` objects
+  - Each spec declares:
+    - `target`: dotted import path + callable (e.g., `tictactoe.ui.gui.main:main`)
+    - `description`: shown in `--list-frontends`
+    - `env_overrides`: optional environment patches before launch
+  - Available specs today:
+    1. `gui` → CustomTkinter desktop app (default)
+    2. `headless` → Same GUI widgets rendered via the shim so tests can run without Tk
+    3. `cli` → Interactive / scripted terminal client
 
-### 7. **GUI Module Import**
-   - `ui/gui/main.py` is imported
-   - All imports at the top execute:
-     - `import customtkinter as ctk`
-     - `from pathlib import Path`
-     - `import sys`
-     - `from tictactoe.domain.logic import TicTacToe, GameState`
+### 7. **Environment Overrides**
+  - Specs can set additional variables before the frontend starts
+  - The `headless` spec forces `TICTACTOE_HEADLESS=1`, which tells the GUI bootstrapper to import `tictactoe.ui.gui.headless_view` instead of the real CustomTkinter primitives
+  - Installers can also pre-set `TICTACTOE_UI` globally (or per shortcut) to bias which frontend launches when users double-click
 
-### 8. **Windows-Specific Initialization**
-   - Platform detection: `platform.system() == "Windows"`
-   - Imports `ctypes` library
-   - Executes:
-     ```python
-     ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID("TicTacToe.Game.v0.1.0")
-     ```
-   - **Purpose:** Sets AppUserModelID so Windows treats this as a unique application
-   - **Effect:** Taskbar icon will use the window's icon instead of Python's icon
+### 8. **Frontend Launch**
+  - `FrontendSpec.load()` uses `importlib` to fetch the target callable lazily
+  - The dispatcher simply invokes the callable; return codes propagate to the shell if the frontend returns an `int`
+  - For the CLI path, control passes to `tictactoe.ui.cli.main` which handles `--script` and `--quiet` flags directly
+  - The following steps describe the GUI/headless branch, which remains the default desktop experience
 
-### 9. **TicTacToeGUI Class Initialization**
-   - Creates `TicTacToeGUI()` instance
-   - `__init__` method executes:
+### 9. **GUI Module Import**
+  - Imports `tictactoe.ui.gui.main`
+  - Brings in dependencies:
+    - `customtkinter` as `ctk`
+    - `pathlib.Path`
+    - `sys`
+    - Domain layer symbols (`TicTacToe`, `GameState`)
 
-### 10. **Game Logic Initialization**
-   - Creates game model: `self.game = TicTacToe()`
-   - Initializes empty 3x3 board
-   - Sets starting player to X
+### 10. **Windows-Specific Initialization**
+  - Detects Windows via `platform.system()`
+  - Calls `ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID("TicTacToe.Game.v0.1.0")`
+  - Ensures taskbar pinning and icons stay isolated from other Python apps
 
-### 11. **Window Creation**
-   - `self.root = ctk.CTk()` - Creates CustomTkinter window
-   - Sets title: `self.root.title("Tic Tac Toe")`
-   - Sets geometry: `self.root.geometry("400x600")`
-   - Makes non-resizable: `self.root.resizable(False, False)`
+### 11. **TicTacToeGUI Class Initialization**
+  - Instantiates `TicTacToeGUI`
+  - Creates the domain model (`TicTacToe()`) and default view config if none supplied
 
-### 12. **Icon Resolution**
-   - Defines possible icon paths:
-     ```python
-     possible_paths = [
-         Path(__file__).parent.parent.parent / "assets" / "favicon.ico",  # Development
-         Path(sys.prefix) / "Lib" / "site-packages" / "tictactoe" / "assets" / "favicon.ico",  # Installed
-     ]
-     ```
-   - Loops through paths checking `path.exists()`
-   - **In installed scenario:**
-     - First path doesn't exist (we're not in source directory)
-     - Second path exists: `.venv\Lib\site-packages\tictactoe\assets\favicon.ico`
-   - Stores found path in `self.icon_path`
+### 12. **Game Logic Initialization**
+  - Sets up an empty 3x3 board
+  - Initializes the snapshot publisher used by both GUI widgets and headless adapters
 
-### 13. **Icon Application**
-   - Executes: `self.root.iconbitmap(default=str(self.icon_path))`
-   - Windows loads the `.ico` file
-   - Sets icon for:
-     - Window titlebar
-     - Taskbar button (due to AppUserModelID set earlier)
-   - **Note:** CustomTkinter normally blocks taskbar icons, but AppUserModelID workaround fixes this
+### 13. **Window Creation**
+  - `self.root = ctk.CTk()` to allocate the window (or shim equivalent when headless)
+  - Applies title, geometry, and resizability constraints
 
-### 14. **Theme Configuration**
-   - Sets appearance mode: `ctk.set_appearance_mode("light")`
-   - Sets color theme: `ctk.set_default_color_theme("blue")`
+### 14. **Icon Resolution**
+  - Searches two locations for `favicon.ico`:
+    1. Source tree: `src/tictactoe/assets` (editable installs)
+    2. Installed path: `<venv>/Lib/site-packages/tictactoe/assets`
+  - First match wins; stored in `self.icon_path`
 
-### 15. **Widget Creation**
-   - Calls `self._create_widgets()`
-   - Creates UI elements:
-     - Title label: "Tic Tac Toe" (32pt bold)
-     - Status label: "Player X's turn" (20pt)
-     - Board frame (container)
-     - 9 cell buttons (3x3 grid, 100x100 pixels each)
-     - Reset button: "New Game"
+### 15. **Icon Application**
+  - Calls `self.root.iconbitmap(default=str(self.icon_path))`
+  - Ties the favicon into the window chrome and Windows taskbar
 
-### 16. **Event Handler Binding**
-   - Each cell button gets: `command=lambda pos=i: self._on_cell_click(pos)`
-   - Reset button gets: `command=self._reset_game`
+### 16. **Theme Configuration**
+  - Sets appearance mode and color theme (`light` / `blue` by default)
+  - Additional theme hooks live in `tictactoe.config.gui`
 
-### 17. **Main Loop Start**
-   - `self.root.mainloop()` begins
-   - **This is a blocking call** - program stays here until window closes
-   - Event loop processes:
-     - Window redraws
-     - Mouse clicks
-     - Keyboard input
-     - Window resize/move (blocked by resizable=False)
+### 17. **Widget Creation**
+  - Builds the grid layout, status labels, and reset controls via `_create_widgets()`
+  - Headless adapters reuse the same controller but render to stub widgets for tests
 
-### 18. **Game Window Display**
-   - Window appears on screen
-   - All icons correctly displayed:
-     - Desktop shortcut: `favicon.ico`
-     - Window titlebar: `favicon.ico`
-     - Taskbar button: `favicon.ico`
-   - User can now interact with the game
+### 18. **Event Handler Binding**
+  - Buttons invoke `_on_cell_click` with their position index
+  - Reset button reinitializes the board via `_reset_game`
+
+### 19. **Main Loop Start**
+  - `self.root.mainloop()` (or the headless simulator) starts the event pump
+  - Blocks until the window closes, processing redraws and input events
+
+### 20. **Game Window Display**
+  - GUI/headless visuals appear with correct icons and telemetry strings
+  - CLI path instead stays inside `_interactive_session`, printing board states to stdout
 
 ---
 
@@ -586,13 +564,15 @@ Distribution Package (ZIP)
 Installation Directory
     │
     ├── .venv\                             ← Isolated Python
-    │   ├── Scripts\pythonw.exe            ← GUI Python interpreter
+  │   ├── Scripts\pythonw.exe            ← GUI Python interpreter
     │   └── Lib\site-packages\
     │       └── tictactoe\                 ← Installed package
     │           ├── __main__.py            ← Entry point
     │           ├── assets\favicon.ico     ← Bundled icon
     │           ├── domain\logic.py        ← Game logic
-    │           └── ui\gui\main.py         ← GUI code
+  │           └── ui\                    ← Presentation layer
+  │               ├── gui\main.py        ← CustomTkinter frontend
+  │               └── cli\main.py        ← Terminal frontend
     │
     └── tic-tac-toe-starter.vbs            ← Launcher
          
@@ -609,14 +589,15 @@ Runtime Stack
     .venv\Scripts\pythonw.exe -m tictactoe
          ↓
     tictactoe\__main__.py:main()
-         ↓
-    tictactoe\ui\gui\main.py:TicTacToeGUI()
-         ↓
-    CustomTkinter Window (with correct icons)
+      ↓
+    Frontend dispatcher (FRONTENDS registry)
+      ↓
+    ├─ gui/headless → tictactoe.ui.gui.main:TicTacToeGUI() → CustomTkinter window or shim widgets
+    └─ cli          → tictactoe.ui.cli.main:main()       → Text-based session in the terminal
 ```
 
 ---
 
-**Document Version:** 1.0  
-**Last Updated:** November 15, 2025  
+**Document Version:** 1.1  
+**Last Updated:** November 16, 2025  
 **Target Audience:** Developers, Advanced Users, System Administrators
