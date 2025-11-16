@@ -1,5 +1,21 @@
 """Configuration module for Tic Tac Toe application."""
 
-from typing import List
+from .gui import (
+	ColorConfig,
+	FontConfig,
+	FontSpec,
+	GameViewConfig,
+	LayoutConfig,
+	TextConfig,
+	WindowConfig,
+)
 
-__all__: List[str] = []
+__all__ = [
+	"ColorConfig",
+	"FontConfig",
+	"FontSpec",
+	"GameViewConfig",
+	"LayoutConfig",
+	"TextConfig",
+	"WindowConfig",
+]

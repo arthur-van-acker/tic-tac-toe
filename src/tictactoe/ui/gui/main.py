@@ -1,8 +1,8 @@
 """GUI implementation for Tic Tac Toe using CustomTkinter."""
 
-from dataclasses import dataclass
-from typing import Any, Callable, Optional, Protocol, Tuple
+from typing import Any, Callable, Optional, Protocol
 
+from tictactoe.config import GameViewConfig, WindowConfig
 from tictactoe.domain.logic import GameSnapshot, TicTacToe
 from tictactoe.ui.gui import bootstrap
 from tictactoe.ui.gui.theme import apply_default_theme
@@ -23,17 +23,9 @@ class ViewFactory(Protocol):
         root: Any,
         on_cell_click: Callable[[int], None],
         on_reset: Callable[[], None],
+        view_config: GameViewConfig,
     ) -> GameView:
         ...
-
-
-@dataclass(frozen=True)
-class WindowConfig:
-    """Window sizing and layout parameters."""
-
-    title: str = "Tic Tac Toe"
-    geometry: str = "400x600"
-    resizable: Tuple[bool, bool] = (False, False)
 
 
 def _build_default_view(
@@ -42,6 +34,7 @@ def _build_default_view(
     root: Any,
     on_cell_click: Callable[[int], None],
     on_reset: Callable[[], None],
+    view_config: GameViewConfig,
 ) -> GameView:
     """Create the default GameView instance."""
 
@@ -50,6 +43,7 @@ def _build_default_view(
         root=root,
         on_cell_click=on_cell_click,
         on_reset=on_reset,
+        view_config=view_config,
     )
 
 
@@ -62,12 +56,14 @@ class TicTacToeGUI:
         game_factory: Optional[GameFactory] = None,
         view_factory: Optional[ViewFactory] = None,
         window_config: Optional[WindowConfig] = None,
+        view_config: Optional[GameViewConfig] = None,
     ):
         """Initialize the GUI application with injectable hooks."""
 
         self._game_factory = game_factory or TicTacToe
         self._view_factory = view_factory or _build_default_view
         self.window_config = window_config or WindowConfig()
+        self.view_config = view_config or GameViewConfig()
 
         self.game = self._game_factory()
         self._ctk_env = bootstrap.load_customtkinter()
@@ -91,6 +87,7 @@ class TicTacToeGUI:
             root=self.root,
             on_cell_click=self._on_cell_click,
             on_reset=self._reset_game,
+            view_config=self.view_config,
         )
         self.view.build()
         self._expose_view_handles()

@@ -249,6 +249,53 @@ For technical details, see [INSTALLATION-TECHNICAL-DETAILS.md](docs/INSTALLATION
 - **AppUserModelID**: Proper Windows taskbar integration
 - **Automated Installer**: One-click installation experience
 
+### Tuning the GUI Theme & Layout
+
+All fonts, strings, dimensions, and color hooks for the CustomTkinter frontend now live in `tictactoe.config.gui`. Inject a `GameViewConfig` (and optionally a `WindowConfig`) into `TicTacToeGUI` to reskin or resize the app without touching the widget code:
+
+```python
+from tictactoe.config import (
+   ColorConfig,
+   FontConfig,
+   FontSpec,
+   GameViewConfig,
+   LayoutConfig,
+   TextConfig,
+   WindowConfig,
+)
+from tictactoe.ui.gui.main import TicTacToeGUI
+
+view_config = GameViewConfig(
+   fonts=FontConfig(
+      title=FontSpec(size=40, weight="bold"),
+      cell=FontSpec(size=48, weight="bold"),
+   ),
+   layout=LayoutConfig(
+      board_padding=(30, 30),
+      cell_size=(120, 120),
+      cell_spacing=8,
+   ),
+   text=TextConfig(
+      title="Ultimate Tic Tac Toe",
+      reset_button="Play Again",
+      win_message_template="Congrats {winner}!",
+   ),
+   colors=ColorConfig(
+      board_background="#101828",
+      cell_fg="#1D2939",
+      cell_hover="#344054",
+      status_text="#F2F4F7",
+   ),
+)
+
+window_config = WindowConfig(title="Ultimate Tic Tac Toe", geometry="500x720")
+
+app = TicTacToeGUI(view_config=view_config, window_config=window_config)
+app.run()
+```
+
+Every field is optional; omit keys you do not want to override. Because the config layer uses frozen dataclasses, you can share presets throughout your project or load them from JSON/YAML before instantiating the GUI.
+
 ---
 
 ## 📚 Documentation

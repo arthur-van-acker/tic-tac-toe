@@ -10,8 +10,9 @@ os.environ.setdefault("TICTACTOE_HEADLESS", "1")
 
 import pytest
 
+from tictactoe.config import WindowConfig
 from tictactoe.domain.logic import GameState, TicTacToe
-from tictactoe.ui.gui.main import TicTacToeGUI, WindowConfig
+from tictactoe.ui.gui.main import TicTacToeGUI
 
 NEEDS_DISPLAY = platform.system() != "Windows" and not os.environ.get("DISPLAY")
 
