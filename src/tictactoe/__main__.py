@@ -96,9 +96,7 @@ def _determine_frontend(cli_choice: Optional[str]) -> FrontendSpec:
         return FRONTENDS[normalized]
     except KeyError as exc:
         available = ", ".join(sorted(FRONTENDS.keys()))
-        message = (
-            f"Unknown frontend '{choice}'. Choose one of: {available}."
-        )
+        message = f"Unknown frontend '{choice}'. Choose one of: {available}."
         raise SystemExit(message) from exc
 
 

@@ -25,8 +25,7 @@ class ViewFactory(Protocol):
         on_cell_click: Callable[[int], None],
         on_reset: Callable[[], None],
         view_config: GameViewConfig,
-    ) -> GameViewPort:
-        ...
+    ) -> GameViewPort: ...
 
 
 def _build_default_view(

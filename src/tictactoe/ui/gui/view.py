@@ -6,7 +6,12 @@ from typing import Callable, Dict, Sequence
 
 from tictactoe.config import FontSpec, GameViewConfig
 from tictactoe.domain.logic import GameSnapshot, GameState
-from tictactoe.ui.gui.contracts import CellButton, GameViewPort, ResetControl, SupportsText
+from tictactoe.ui.gui.contracts import (
+    CellButton,
+    GameViewPort,
+    ResetControl,
+    SupportsText,
+)
 
 
 class GameView(GameViewPort):

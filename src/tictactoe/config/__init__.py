@@ -3,13 +3,13 @@
 from __future__ import annotations
 
 from .gui import (
-	ColorConfig,
-	FontConfig,
-	FontSpec,
-	GameViewConfig,
-	LayoutConfig,
-	TextConfig,
-	WindowConfig,
+    ColorConfig,
+    FontConfig,
+    FontSpec,
+    GameViewConfig,
+    LayoutConfig,
+    TextConfig,
+    WindowConfig,
 )
 
 # The package intentionally keeps an empty __all__ so wildcard imports stay lean

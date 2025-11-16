@@ -82,7 +82,9 @@ def locate_icon_file() -> Optional[Path]:
     if _ICON_CACHE and _ICON_CACHE.exists():
         return _ICON_CACHE
 
-    source_candidate = Path(__file__).resolve().parent.parent.parent / "assets" / "favicon.ico"
+    source_candidate = (
+        Path(__file__).resolve().parent.parent.parent / "assets" / "favicon.ico"
+    )
     if source_candidate.exists():
         _ICON_CACHE = source_candidate
         return source_candidate
@@ -156,7 +158,9 @@ def _emit_icon_warning(message: str, handler: Optional[Callable[[str], None]]) -
     _LOGGER.warning(message)
 
 
-def schedule_icon_refresh(root: object, icon_path: Optional[Path], *, headless: bool) -> None:
+def schedule_icon_refresh(
+    root: object, icon_path: Optional[Path], *, headless: bool
+) -> None:
     """Schedule a delayed icon update to work around CustomTkinter quirks."""
 
     if headless or icon_path is None:
