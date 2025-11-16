@@ -1,18 +1,28 @@
-[build-system]
-requires = ["setuptools>=68.0", "wheel"]
-build-backend = "setuptools.build_meta"
-
-[project]
+[build-system
+]
+requires = [
+    "setuptools>=68.0",
+    "wheel"
+]
+build-backend = "setuptools.build_meta"[project
+]
 name = "tictactoe"
 version = "0.1.0"
 description = "A modern Tic Tac Toe game built with CustomTkinter"
 readme = "README.md"
 requires-python = ">=3.8"
-license = {file = "LICENSE"}
+license = {file = "LICENSE"
+}
 authors = [
-    {name = "Your Name", email = "your.email@example.com"}
+    {name = "Your Name", email = "your.email@example.com"
+    }
 ]
-keywords = ["game", "tic-tac-toe", "gui", "customtkinter"]
+keywords = [
+    "game",
+    "tic-tac-toe",
+    "gui",
+    "customtkinter"
+]
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Intended Audience :: End Users/Desktop",
@@ -34,7 +44,8 @@ dependencies = [
     "pillow>=12.0.0",
 ]
 
-[project.optional-dependencies]
+[project.optional-dependencies
+]
 dev = [
     "pytest>=7.4.0",
     "pytest-cov>=4.1.0",
@@ -43,30 +54,42 @@ dev = [
     "mypy>=1.5.0",
 ]
 
-[project.scripts]
-tictactoe = "tictactoe.__main__:main"
-
-[project.urls]
+[project.scripts
+]
+tictactoe = "tictactoe.__main__:main"[project.urls
+]
 Homepage = "https://github.com/yourusername/tic-tac-toe"
 Repository = "https://github.com/yourusername/tic-tac-toe"
-Issues = "https://github.com/yourusername/tic-tac-toe/issues"
+Issues = "https://github.com/yourusername/tic-tac-toe/issues"[tool.setuptools.packages.find
+]
+where = [
+    "src"
+]
 
-[tool.setuptools.packages.find]
-where = ["src"]
+[tool.setuptools.package-data
+]
+tictactoe = [
+    "assets/*"
+]
 
-[tool.setuptools.package-data]
-tictactoe = ["assets/*"]
-
-[tool.black]
+[tool.black
+]
 line-length = 88
-target-version = ["py38", "py39", "py310", "py311", "py312", "py313"]
+target-version = [
+    "py38",
+    "py39",
+    "py310",
+    "py311",
+    "py312",
+    "py313"
+]
 include = '\.pyi?$'
 
-[tool.ruff]
+[tool.ruff
+]
 line-length = 88
-target-version = "py38"
-
-[tool.ruff.lint]
+target-version = "py38"[tool.ruff.lint
+]
 select = [
     "E",   # pycodestyle errors
     "W",   # pycodestyle warnings
@@ -76,12 +99,20 @@ select = [
     "C4",  # flake8-comprehensions
     "UP",  # pyupgrade
 ]
-extend-ignore = ["UP006", "UP007", "UP037"]
+extend-ignore = [
+    "UP006",
+    "UP007",
+    "UP037"
+]
 
-[tool.ruff.lint.per-file-ignores]
-"__init__.py" = ["F401"]
+[tool.ruff.lint.per-file-ignores
+]
+"__init__.py" = [
+    "F401"
+]
 
-[tool.mypy]
+[tool.mypy
+]
 python_version = "3.8"
 warn_return_any = true
 warn_unused_configs = true
