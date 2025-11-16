@@ -138,6 +138,9 @@ different interfaces without forking the entry point. Pick a frontend at runtime
 # Launch the CustomTkinter GUI (default)
 python -m tictactoe --ui gui
 
+# Launch the GUI with the headless shim (CI or servers without Tk)
+python -m tictactoe --ui headless
+
 # Launch the terminal client
 python -m tictactoe --ui cli
 
@@ -155,6 +158,14 @@ Environment variables offer zero-touch overrides for installers or CI:
 Setting `TICTACTOE_UI=headless` automatically flips `TICTACTOE_HEADLESS=1`, which is
 useful for CI smoke tests that still exercise the GUI bootstrap path without a Tk
 runtime.
+
+Need scripted or fully automated CLI sessions? Invoke the CLI module directly so
+you can access its own flags (such as `--script` and `--quiet`):
+
+```bash
+# Replay a deterministic move list without rendering the ASCII board
+python -m tictactoe.ui.cli.main --script 0,4,8 --quiet
+```
 
 #### Swap the View Adapter
 
