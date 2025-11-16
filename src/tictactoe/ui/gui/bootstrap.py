@@ -6,7 +6,6 @@ import logging
 import os
 import platform
 import shutil
-import sys
 import tempfile
 from dataclasses import dataclass
 from importlib import resources

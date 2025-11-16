@@ -1,7 +1,7 @@
 """Tests for the CLI entry point."""
 
-from importlib import import_module, reload
 import os
+from importlib import import_module, reload
 
 import pytest
 

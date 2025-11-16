@@ -9,7 +9,6 @@ import sys
 from dataclasses import dataclass, field
 from typing import Callable, Mapping, MutableMapping, Optional, Sequence
 
-
 FrontendRunner = Callable[[], Optional[int]]
 
 _FRONTEND_ENV_VAR = "TICTACTOE_UI"

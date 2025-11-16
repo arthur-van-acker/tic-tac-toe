@@ -9,7 +9,6 @@ from tictactoe.ui.gui.contracts import GameViewPort
 from tictactoe.ui.gui.theme import apply_default_theme
 from tictactoe.ui.gui.view import GameView
 
-
 bootstrap.configure_windows_app_model()
 
 
