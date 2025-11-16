@@ -332,6 +332,7 @@ Every field is optional; omit keys you do not want to override. Because the conf
 
 - **[INSTALLATION-GUIDE.md](docs/INSTALLATION-GUIDE.md)**: User-friendly installation instructions
 - **[INSTALLATION-TECHNICAL-DETAILS.md](docs/INSTALLATION-TECHNICAL-DETAILS.md)**: Technical deep-dive for developers
+- **[TEMPLATE-USAGE-GUIDE.md](docs/TEMPLATE-USAGE-GUIDE.md)**: Step-by-step instructions plus rationale for customizing the template
 
 ---
 
