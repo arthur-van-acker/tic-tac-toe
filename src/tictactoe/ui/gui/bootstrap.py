@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import logging
 import os
 import platform
 import shutil
@@ -12,7 +13,7 @@ from importlib import resources
 from pathlib import Path
 from tkinter import TclError
 from types import ModuleType
-from typing import Optional, Tuple
+from typing import Callable, Optional, Tuple
 
 
 def _import_headless_module() -> ModuleType:
@@ -70,6 +71,7 @@ def create_root(env: CtkEnvironment) -> Tuple[ModuleType, object, CtkEnvironment
 
 
 _ICON_CACHE: Optional[Path] = None
+_LOGGER = logging.getLogger(__name__)
 
 
 def locate_icon_file() -> Optional[Path]:
@@ -124,18 +126,34 @@ def _locate_package_icon() -> Optional[Path]:
     return None
 
 
-def apply_window_icon(root: object, icon_path: Optional[Path], *, headless: bool) -> None:
+def apply_window_icon(
+    root: object,
+    icon_path: Optional[Path],
+    *,
+    headless: bool,
+    warning_handler: Optional[Callable[[str], None]] = None,
+) -> None:
     """Set the window icon when running with a real Tk backend."""
 
     if headless or icon_path is None:
         if icon_path is None:
-            print("Warning: Icon file not found")
+            _emit_icon_warning("Icon file not found", warning_handler)
         return
 
     try:
         root.iconbitmap(default=str(icon_path))
     except TclError as exc:
-        print(f"Warning: Could not set icon: {exc}")
+        _emit_icon_warning(f"Could not set icon: {exc}", warning_handler)
+
+
+def _emit_icon_warning(message: str, handler: Optional[Callable[[str], None]]) -> None:
+    """Route icon warnings without polluting stdout."""
+
+    if handler is not None:
+        handler(message)
+        return
+
+    _LOGGER.warning(message)
 
 
 def schedule_icon_refresh(root: object, icon_path: Optional[Path], *, headless: bool) -> None:
