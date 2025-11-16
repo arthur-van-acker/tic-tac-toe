@@ -268,7 +268,7 @@ pwsh scripts/run-ci.ps1
 bash scripts/run-ci.sh
 ```
 
-Set `SKIP_EDITABLE_INSTALL=1` (or pass `-SkipEditableInstall`) when you only want to re-run the tox stages.
+Set `SKIP_REQUIREMENTS_INSTALL=1` (or pass `-SkipRequirementsInstall`) when you only want to re-run the tox stages.
 
 ### 13.2 Pre-commit / pre-push automation
 

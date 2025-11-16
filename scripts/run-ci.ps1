@@ -1,9 +1,42 @@
 param(
-    [string]$Python = "python",
-    [switch]$SkipEditableInstall
+    [string]$Python,
+    [switch]$SkipRequirementsInstall
 )
 
 $ErrorActionPreference = "Stop"
+$isWindowsPlatform = $env:OS -eq "Windows_NT"
+$repoRoot = Split-Path -Parent $PSScriptRoot
+
+function Get-DefaultPython {
+    if ($env:VIRTUAL_ENV) {
+        if ($isWindowsPlatform) {
+            return (Join-Path $env:VIRTUAL_ENV "Scripts\python.exe")
+        }
+        return (Join-Path $env:VIRTUAL_ENV "bin/python")
+    }
+    $embeddedVenv = Join-Path $repoRoot ".venv"
+    if (Test-Path $embeddedVenv) {
+        $winCandidate = Join-Path $embeddedVenv "Scripts\python.exe"
+        $posixCandidate = Join-Path $embeddedVenv "bin/python"
+        if ($isWindowsPlatform -and (Test-Path $winCandidate)) {
+            return $winCandidate
+        }
+        if (-not $isWindowsPlatform -and (Test-Path $posixCandidate)) {
+            return $posixCandidate
+        }
+        if (Test-Path $winCandidate) {
+            return $winCandidate
+        }
+        if (Test-Path $posixCandidate) {
+            return $posixCandidate
+        }
+    }
+    return "python"
+}
+
+if (-not $PSBoundParameters.ContainsKey('Python') -or [string]::IsNullOrWhiteSpace($Python)) {
+    $Python = Get-DefaultPython
+}
 
 function Invoke-Step {
     param(
@@ -23,15 +56,16 @@ function Invoke-PythonModule {
 
     & $Python -m $Module @Arguments
     if ($LASTEXITCODE -ne 0) {
-        throw "Command '$Python -m $Module $Arguments' failed with exit code $LASTEXITCODE"
+        $joinedArgs = if ($Arguments.Length -gt 0) { [string]::Join(' ', $Arguments) } else { '' }
+        throw "Command '$Python -m $Module $joinedArgs' failed with exit code $LASTEXITCODE"
     }
 }
 
 Write-Host "Running local CI checks with $Python" -ForegroundColor Green
 
-if (-not $SkipEditableInstall) {
-    Invoke-Step -Label "Installing project in editable mode" -Operation {
-        Invoke-PythonModule -Module pip -Arguments @("install", "-e", ".")
+if (-not $SkipRequirementsInstall) {
+    Invoke-Step -Label "Syncing requirements (installs -e . automatically)" -Operation {
+        Invoke-PythonModule -Module pip -Arguments @("install", "-r", "requirements.txt")
     }
 }
 

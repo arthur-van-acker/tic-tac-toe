@@ -368,7 +368,7 @@ bash scripts/run-ci.sh
 
 ### Local automation helpers
 
-- `scripts/run-ci.ps1` / `scripts/run-ci.sh` mirror the CI pipeline (editable install + tox lint/type/py313). Run them before every push to catch formatting, typing, or packaging issues locally.
+- `scripts/run-ci.ps1` / `scripts/run-ci.sh` mirror the CI pipeline (dev requirements + editable install + tox lint/type/py313). Run them before every push to catch formatting, typing, or packaging issues locally. Pass `-SkipRequirementsInstall` (PowerShell) or `SKIP_REQUIREMENTS_INSTALL=1` (bash/zsh) if you have already synced dependencies in the current shell.
 - `.pre-commit-config.yaml` wires up Black, Ruff, mypy, and safety checks for file formats. Install once and forget:
 
 ```pwsh
