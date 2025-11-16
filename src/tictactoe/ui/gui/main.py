@@ -90,7 +90,6 @@ class TicTacToeGUI:
             view_config=self.view_config,
         )
         self.view.build()
-        self._expose_view_handles()
 
         self.game.add_listener(self._on_game_updated)
         self._on_game_updated(self.game.snapshot)
@@ -104,15 +103,6 @@ class TicTacToeGUI:
         self._ctk_headless = env.headless
         return root
 
-    def _expose_view_handles(self) -> None:
-        """Expose view widgets for tests and legacy callers."""
-
-        self.title_label = self.view.title_label
-        self.status_label = self.view.status_label
-        self.board_frame = self.view.board_frame
-        self.reset_button = self.view.reset_button
-        self.buttons = self.view.buttons
-
     def _on_cell_click(self, position: int):
         """Handle cell button click."""
         self.game.make_move(position)
@@ -120,7 +110,7 @@ class TicTacToeGUI:
     def _on_game_updated(self, snapshot: GameSnapshot) -> None:
         """Render the latest game snapshot to the UI widgets."""
 
-        if not hasattr(self, "buttons"):
+        if not self.view.is_ready():
             return
 
         self.view.render(snapshot)

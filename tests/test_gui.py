@@ -44,9 +44,9 @@ def _create_app_or_skip(**kwargs) -> TicTacToeGUI:
 def test_gui_initializes_widgets():
     app = _create_app_or_skip()
     try:
-        assert len(app.buttons) == 9
-        assert "Player X" in app.status_label.cget("text")
-        assert app.reset_button.cget("text") == "New Game"
+        assert app.view.button_count() == 9
+        assert "Player X" in app.view.status_text()
+        assert app.view.reset_button_label() == "New Game"
     finally:
         app.root.destroy()
 
@@ -56,9 +56,9 @@ def test_gui_click_updates_button_and_status():
     app = _create_app_or_skip()
     try:
         app._on_cell_click(0)
-        assert app.buttons[0].cget("text") == "X"
-        assert app.buttons[0].cget("state") == "disabled"
-        assert "Player O" in app.status_label.cget("text")
+        assert app.view.button_text(0) == "X"
+        assert app.view.button_state(0) == "disabled"
+        assert "Player O" in app.view.status_text()
     finally:
         app.root.destroy()
 
@@ -71,11 +71,11 @@ def test_gui_reset_game_restores_state():
         app._on_cell_click(3)
         app._reset_game()
 
-        for button in app.buttons:
-            assert button.cget("text") == ""
-            assert button.cget("state") == "normal"
+        for index in range(app.view.button_count()):
+            assert app.view.button_text(index) == ""
+            assert app.view.button_state(index) == "normal"
         assert app.game.state == GameState.PLAYING
-        assert "Player X" in app.status_label.cget("text")
+        assert "Player X" in app.view.status_text()
     finally:
         app.root.destroy()
 
@@ -88,7 +88,7 @@ def test_gui_win_updates_status_message():
             app._on_cell_click(move)
 
         assert app.game.state == GameState.X_WON
-        assert "wins" in app.status_label.cget("text")
+        assert "wins" in app.view.status_text()
     finally:
         app.root.destroy()
 
@@ -116,12 +116,32 @@ def test_gui_accepts_custom_factories_and_window_config():
             self.reset_button = DummyWidget()
             self.buttons = [DummyWidget() for _ in range(9)]
             self.render_calls = []
+            self._built = False
 
         def build(self):
-            return None
+            self._built = True
 
         def render(self, snapshot):
             self.render_calls.append(snapshot)
+
+        # Minimal telemetry helpers to align with GameView API
+        def is_ready(self):
+            return self._built
+
+        def button_count(self):
+            return len(self.buttons)
+
+        def button_text(self, position):
+            return self.buttons[position].cget("text")
+
+        def button_state(self, position):
+            return self.buttons[position].cget("state")
+
+        def status_text(self):
+            return self.status_label.cget("text")
+
+        def reset_button_label(self):
+            return self.reset_button.cget("text")
 
     factory_calls = []
 

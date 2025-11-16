@@ -31,6 +31,7 @@ class GameView:
         self.board_frame = None
         self.reset_button = None
         self.buttons: List[object] = []
+        self._built = False
 
     def build(self) -> None:
         """Construct all widgets for the application."""
@@ -60,6 +61,7 @@ class GameView:
 
         self._build_board(fonts["cell"])
         self._build_reset_button(fonts["reset"])
+        self._built = True
 
     def _build_board(self, font_button) -> None:
         """Create the 3x3 grid of buttons."""
@@ -98,8 +100,38 @@ class GameView:
     def render(self, snapshot: GameSnapshot) -> None:
         """Update the widget state to reflect the game snapshot."""
 
+        if not self.is_ready():
+            return
+
         self._render_board(snapshot.board)
         self._render_status(snapshot)
+
+    def is_ready(self) -> bool:
+        """Return True once build() has produced the widget tree."""
+
+        return self._built
+
+    def button_count(self) -> int:
+        self._ensure_built()
+        return len(self.buttons)
+
+    def button_text(self, position: int) -> str:
+        button = self._button_at(position)
+        return button.cget("text")
+
+    def button_state(self, position: int) -> str:
+        button = self._button_at(position)
+        return button.cget("state")
+
+    def status_text(self) -> str:
+        if not self.status_label:
+            return ""
+        return self.status_label.cget("text")
+
+    def reset_button_label(self) -> str:
+        if not self.reset_button:
+            return ""
+        return self.reset_button.cget("text")
 
     def _render_board(self, board: Sequence) -> None:
         for position, button in enumerate(self.buttons):
@@ -163,3 +195,13 @@ class GameView:
             return self.config.text.draw_message
         winner = snapshot.winner.value if snapshot.winner else "Unknown"
         return self.config.text.win_message_template.format(winner=winner)
+
+    def _ensure_built(self) -> None:
+        if not self._built:
+            raise RuntimeError("GameView widgets have not been built yet")
+
+    def _button_at(self, position: int):
+        self._ensure_built()
+        if position < 0 or position >= len(self.buttons):
+            raise IndexError(position)
+        return self.buttons[position]
