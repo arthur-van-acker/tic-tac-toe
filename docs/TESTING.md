@@ -32,17 +32,20 @@ This document explains everything you need to know to design, write, run, and ex
 - **tox** for matrixed execution (`tox -e py313`, `tox -e lint`).
 - **ruff**, **black**, **mypy** invoked via tox environments or directly for quality gates.
 - **Custom headless widgets** (`tictactoe.ui.gui.headless`) emulate CustomTkinter so GUI tests run anywhere.
+- **pytest.ini guard rails:** `--strict-config`, `--strict-markers`, `--cov=tictactoe`, and `--cov-fail-under=50` are applied automatically so every local run matches CI expectations.
 
 ---
 
 ## 4. Environment Setup
 
 1. Create/activate the project venv (already part of the template workflow).
-2. Install the editable package plus dev requirements:
+2. Install the editable package plus dev requirements (the pinned `requirements.txt`
+already ends with `-e .`, so one command keeps everything in sync):
 
 ```pwsh
-pip install -e .
 pip install -r requirements.txt
+# or, if you prefer extras syntax
+pip install -e .[dev]
 ```
 
 3. (Optional) Pin GUI tests to headless mode to avoid real Tk dependencies or
@@ -94,6 +97,21 @@ python -m tox                   # run everything configured
 ```pwsh
 python -m pytest tests/test_logic.py -k draw_game
 ```
+
+### 5.5 Exercising the CLI Script Mode
+
+The top-level dispatcher (`python -m tictactoe`) only accepts the `--ui` and
+`--list-frontends` switches, so CLI-specific flags live on the CLI module. When
+you need to reproduce `tests/test_cli.py` scenarios manually, call the module
+directly:
+
+```pwsh
+# Run the CLI without rendering the ASCII board
+python -m tictactoe.ui.cli.main --script 0,3,4,6,8 --quiet
+```
+
+This mirrors exactly what the tests assert: scripted move sequences raise
+`SystemExit` on invalid positions and produce the same snapshots as the GUI.
 
 ---
 
@@ -177,6 +195,10 @@ Benefits:
 - `tictactoe.ui.gui.headless` mirrors the CustomTkinter API. Tests instantiate real widgets, but method bodies are no-ops.
 - The module sets `__HEADLESS__ = True`; you can assert against it for sanity if needed.
 - If you add new widget types or methods in the production GUI, update the headless shim simultaneously to keep tests compiling.
+- Selecting the `headless` frontend via `python -m tictactoe --ui headless` (or by
+    setting `TICTACTOE_UI=headless`) automatically forces
+    `TICTACTOE_HEADLESS=1`, so GUI smoke tests run without talking to a real Tk
+    runtime.
 
 ---
 
@@ -198,9 +220,11 @@ python -m pytest --cov-report=term-missing
 Even though this repo does not ship a CI workflow by default, the testing strategy assumes CI will:
 
 1. Install dependencies (same commands as Section 4).
-2. Run `python -m pytest -m "not gui"` for fast feedback.
-3. Optionally run GUI tests in headless mode (set env var).
-4. Execute `tox -e lint,type` to enforce formatting and typing standards.
+2. Run `python -m pytest -m "not gui"` for fast feedback (this mirrors the
+    command baked into `tox -e py313`).
+3. Optionally run GUI tests in headless mode (set `TICTACTOE_HEADLESS=1` or invoke
+    `python -m tictactoe --ui headless` before launching the suite).
+4. Execute `python -m tox -e lint,type` to enforce formatting and typing standards.
 5. Archive coverage XML/HTML if needed for dashboards.
 
 When adding a workflow (`.github/workflows/tests.yml`), remember to install `python -m pip install tox` and set `TICTACTOE_HEADLESS=1`.
@@ -263,6 +287,8 @@ When replacing Tic Tac Toe with your own application:
 | Tox all envs               | `python -m tox`                                           |
 | Lint + format via tox       | `python -m tox -e lint`                                   |
 | Type check via tox          | `python -m tox -e type`                                   |
+| List registered frontends   | `python -m tictactoe --list-frontends`                    |
+| Scripted CLI smoke          | `python -m tictactoe.ui.cli.main --script 0,3,4,6,8 --quiet` |
 
 Keep this table handy when onboarding new contributors.
 
