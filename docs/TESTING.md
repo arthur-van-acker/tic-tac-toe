@@ -254,7 +254,40 @@ Tox environments (`lint`, `type`) already wrap these, but direct invocation is f
 
 ---
 
-## 13. Extending the Template
+## 13. Local CI Shortcuts & Hooks
+
+### 13.1 Run the entire pipeline locally
+
+Use the helper scripts to rehearse the CI steps (editable install + lint + type + tests) with one command:
+
+```pwsh
+pwsh scripts/run-ci.ps1
+```
+
+```bash
+bash scripts/run-ci.sh
+```
+
+Set `SKIP_EDITABLE_INSTALL=1` (or pass `-SkipEditableInstall`) when you only want to re-run the tox stages.
+
+### 13.2 Pre-commit / pre-push automation
+
+Install the hooks once so Black, Ruff, mypy, and the fast pytest suite run automatically before code leaves your machine:
+
+```pwsh
+python -m pip install pre-commit
+pre-commit install
+pre-commit install --hook-type pre-push
+```
+
+- **Commit-time hooks:** enforce formatting, lint rules, and TOML/YAML hygiene.
+- **Pre-push hooks:** replay `python -m pytest -m "not gui"` plus `python -m tox -e lint,type` (matching the GitHub Actions workflow).
+
+Temporarily bypass hooks with `SKIP=hook-id pre-commit run hook-id` as documented at [pre-commit.com](https://pre-commit.com/), but always rerun the skipped command manually before opening a PR.
+
+---
+
+## 14. Extending the Template
 
 When replacing Tic Tac Toe with your own application:
 
@@ -265,7 +298,7 @@ When replacing Tic Tac Toe with your own application:
 
 ---
 
-## 14. Future Enhancements (Testing Roadmap)
+## 15. Future Enhancements (Testing Roadmap)
 
 - [ ] Introduce snapshot-based golden tests for complex layouts.
 - [ ] Add property-based tests (Hypothesis) for board validation.
@@ -275,7 +308,7 @@ When replacing Tic Tac Toe with your own application:
 
 ---
 
-## 15. Quick Reference Commands
+## 16. Quick Reference Commands
 
 | Task                        | Command (PowerShell)                                      |
 |-----------------------------|-----------------------------------------------------------|

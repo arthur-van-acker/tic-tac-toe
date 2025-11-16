@@ -358,7 +358,26 @@ python -m mypy src
 
 # Full tox automation (lint + type + tests)
 python -m tox -e lint,type,py313
+
+# One-command local CI rehearsal (PowerShell)
+pwsh scripts/run-ci.ps1
+
+# Bash/zsh equivalent
+bash scripts/run-ci.sh
 ```
+
+### Local automation helpers
+
+- `scripts/run-ci.ps1` / `scripts/run-ci.sh` mirror the CI pipeline (editable install + tox lint/type/py313). Run them before every push to catch formatting, typing, or packaging issues locally.
+- `.pre-commit-config.yaml` wires up Black, Ruff, mypy, and safety checks for file formats. Install once and forget:
+
+```pwsh
+python -m pip install pre-commit
+pre-commit install           # run on every commit
+pre-commit install --hook-type pre-push
+```
+
+The pre-push hook replays the fast pytest suite and `tox -e lint,type`, matching the workflow GitHub Actions enforces.
 
 ---
 
