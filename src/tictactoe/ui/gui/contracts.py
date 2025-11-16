@@ -15,6 +15,8 @@ class SupportsText(Protocol):
 
     def cget(self, key: str) -> str: ...
 
+    def pack(self, *args, **kwargs) -> None: ...
+
 
 @runtime_checkable
 class CellButton(Protocol):
@@ -37,6 +39,8 @@ class ResetControl(Protocol):
     ) -> None: ...
 
     def cget(self, key: str) -> str: ...
+
+    def pack(self, *args, **kwargs) -> None: ...
 
 
 class GameViewPort(Protocol):

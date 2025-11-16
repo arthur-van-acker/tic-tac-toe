@@ -12,7 +12,7 @@ from importlib import resources
 from pathlib import Path
 from tkinter import TclError
 from types import ModuleType
-from typing import Callable, Optional, Tuple
+from typing import Any, Callable, Optional, Tuple
 
 
 def _import_headless_module() -> ModuleType:
@@ -52,12 +52,18 @@ def configure_windows_app_model(app_id: str = "TicTacToe.Game.v0.1.0") -> None:
     try:
         import ctypes
 
-        ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(app_id)
+        windll = getattr(ctypes, "windll", None)
+        if windll is None:
+            return
+        shell32 = getattr(windll, "shell32", None)
+        if shell32 is None:
+            return
+        shell32.SetCurrentProcessExplicitAppUserModelID(app_id)
     except (AttributeError, OSError):
         pass
 
 
-def create_root(env: CtkEnvironment) -> Tuple[ModuleType, object, CtkEnvironment]:
+def create_root(env: CtkEnvironment) -> Tuple[ModuleType, Any, CtkEnvironment]:
     """Create the CTk root window, retrying in headless mode if needed."""
 
     try:
@@ -99,8 +105,12 @@ def locate_icon_file() -> Optional[Path]:
 def _locate_package_icon() -> Optional[Path]:
     """Locate the icon via importlib.resources for installed packages."""
 
+    files_fn = getattr(resources, "files", None)
+    if files_fn is None:
+        return None
+
     try:
-        icon_resource = resources.files("tictactoe") / "assets" / "favicon.ico"
+        icon_resource = files_fn("tictactoe") / "assets" / "favicon.ico"
     except ModuleNotFoundError:
         return None
 
@@ -111,8 +121,12 @@ def _locate_package_icon() -> Optional[Path]:
     except TypeError:
         pass
 
+    as_file_fn = getattr(resources, "as_file", None)
+    if as_file_fn is None:
+        return None
+
     try:
-        with resources.as_file(icon_resource) as extracted_path:
+        with as_file_fn(icon_resource) as extracted_path:
             extracted = Path(extracted_path)
             if not extracted.exists():
                 return None
@@ -128,7 +142,7 @@ def _locate_package_icon() -> Optional[Path]:
 
 
 def apply_window_icon(
-    root: object,
+    root: Any,
     icon_path: Optional[Path],
     *,
     headless: bool,
@@ -158,7 +172,7 @@ def _emit_icon_warning(message: str, handler: Optional[Callable[[str], None]]) -
 
 
 def schedule_icon_refresh(
-    root: object, icon_path: Optional[Path], *, headless: bool
+    root: Any, icon_path: Optional[Path], *, headless: bool
 ) -> None:
     """Schedule a delayed icon update to work around CustomTkinter quirks."""
 

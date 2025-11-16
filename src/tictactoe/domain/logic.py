@@ -2,7 +2,7 @@
 
 from dataclasses import dataclass
 from enum import Enum
-from typing import Callable, Optional
+from typing import Callable, Optional, Tuple
 
 
 class Player(Enum):
@@ -21,11 +21,14 @@ class GameState(Enum):
     DRAW = "draw"
 
 
+BoardTuple = Tuple[Optional["Player"], ...]
+
+
 @dataclass(frozen=True)
 class GameSnapshot:
     """Immutable view of the current game state."""
 
-    board: tuple[Optional["Player"], ...]
+    board: BoardTuple
     current_player: "Player"
     state: "GameState"
     winner: Optional["Player"]
@@ -37,6 +40,9 @@ class TicTacToe:
     def __init__(self):
         """Initialize a new game."""
         self._listeners: list[Callable[[GameSnapshot], None]] = []
+        self._board: list[Optional[Player]] = [None for _ in range(9)]
+        self.current_player: Player = Player.X
+        self.state: GameState = GameState.PLAYING
         self.reset()
 
     def add_listener(self, listener: Callable[[GameSnapshot], None]) -> None:
@@ -51,7 +57,7 @@ class TicTacToe:
             self._listeners.remove(listener)
 
     @property
-    def board(self) -> tuple[Optional[Player], ...]:
+    def board(self) -> BoardTuple:
         """Return an immutable view of the board."""
 
         return tuple(self._board)
@@ -147,7 +153,7 @@ class TicTacToe:
 
     def reset(self) -> None:
         """Reset the game to initial state."""
-        self._board = [None] * 9
+        self._board = [None for _ in range(9)]
         self.current_player = Player.X
         self.state = GameState.PLAYING
         self._notify_listeners()

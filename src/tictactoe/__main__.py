@@ -7,7 +7,7 @@ import importlib
 import os
 import sys
 from dataclasses import dataclass, field
-from typing import Callable, Mapping, MutableMapping, Optional, Sequence
+from typing import Callable, Mapping, MutableMapping, Optional, Sequence, cast
 
 FrontendRunner = Callable[[], Optional[int]]
 
@@ -33,7 +33,7 @@ class FrontendSpec:
         if not callable(runner):  # pragma: no cover - defensive
             message = f"Frontend target {self.target!r} is not callable"
             raise TypeError(message)
-        return runner
+        return cast(FrontendRunner, runner)
 
 
 FRONTENDS: MutableMapping[str, FrontendSpec] = {

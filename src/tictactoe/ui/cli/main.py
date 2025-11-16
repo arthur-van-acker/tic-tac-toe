@@ -39,7 +39,8 @@ def _format_board(snapshot: GameSnapshot) -> str:
         cells = []
         for offset in range(3):
             idx = base + offset
-            value = board[idx].value if board[idx] else str(idx)
+            cell = board[idx]
+            value = cell.value if cell is not None else str(idx)
             cells.append(value)
         rows.append(" | ".join(cells))
     return "\n---------\n".join(rows)

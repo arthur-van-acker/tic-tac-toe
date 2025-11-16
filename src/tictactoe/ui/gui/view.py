@@ -2,10 +2,10 @@
 
 from __future__ import annotations
 
-from typing import Callable, Dict, Sequence
+from typing import Any, Callable, Dict, Optional, Sequence, cast
 
 from tictactoe.config import FontSpec, GameViewConfig
-from tictactoe.domain.logic import GameSnapshot, GameState
+from tictactoe.domain.logic import GameSnapshot, GameState, Player
 from tictactoe.ui.gui.contracts import (
     CellButton,
     GameViewPort,
@@ -26,15 +26,15 @@ class GameView(GameViewPort):
         on_reset: Callable[[], None],
         view_config: GameViewConfig | None = None,
     ) -> None:
-        self.ctk = ctk_module
-        self.root = root
+        self.ctk: Any = ctk_module
+        self.root: Any = root
         self._on_cell_click = on_cell_click
         self._on_reset = on_reset
         self.config = view_config or GameViewConfig()
 
         self.title_label: SupportsText | None = None
         self.status_label: SupportsText | None = None
-        self.board_frame = None
+        self.board_frame: Any | None = None
         self.reset_button: ResetControl | None = None
         self.buttons: list[CellButton] = []
         self._built = False
@@ -44,21 +44,29 @@ class GameView(GameViewPort):
 
         fonts = self._build_fonts()
 
-        self.title_label = self.ctk.CTkLabel(
+        title_label = cast(
+            SupportsText,
+            self.ctk.CTkLabel(
             self.root,
             text=self.config.text.title,
             font=fonts["title"],
             **self._text_color_kwargs(self.config.colors.title_text),
+            ),
         )
-        self.title_label.pack(pady=self.config.layout.title_padding)
+        self.title_label = title_label
+        title_label.pack(pady=self.config.layout.title_padding)
 
-        self.status_label = self.ctk.CTkLabel(
+        status_label = cast(
+            SupportsText,
+            self.ctk.CTkLabel(
             self.root,
             text="",
             font=fonts["status"],
             **self._text_color_kwargs(self.config.colors.status_text),
+            ),
         )
-        self.status_label.pack(pady=self.config.layout.status_padding)
+        self.status_label = status_label
+        status_label.pack(pady=self.config.layout.status_padding)
 
         board_frame_kwargs = self._frame_color_kwargs()
         self.board_frame = self.ctk.CTkFrame(self.root, **board_frame_kwargs)
@@ -69,7 +77,7 @@ class GameView(GameViewPort):
         self._build_reset_button(fonts["reset"])
         self._built = True
 
-    def _build_board(self, font_button) -> None:
+    def _build_board(self, font_button: Any) -> None:
         """Create the 3x3 grid of buttons."""
 
         self.buttons = []
@@ -92,22 +100,28 @@ class GameView(GameViewPort):
             )
             self.buttons.append(button)
 
-    def _build_reset_button(self, font_reset) -> None:
+    def _build_reset_button(self, font_reset: Any) -> None:
         reset_kwargs = self._reset_button_color_kwargs()
-        self.reset_button = self.ctk.CTkButton(
+        reset_button = cast(
+            ResetControl,
+            self.ctk.CTkButton(
             self.root,
             text=self.config.text.reset_button,
             font=font_reset,
             command=self._on_reset,
             **reset_kwargs,
+            ),
         )
-        self.reset_button.pack(pady=self.config.layout.reset_padding)
+        self.reset_button = reset_button
+        reset_button.pack(pady=self.config.layout.reset_padding)
 
     def render(self, snapshot: GameSnapshot) -> None:
         """Update the widget state to reflect the game snapshot."""
 
         if not self.is_ready():
             return
+
+        self._ensure_built()
 
         self._render_board(snapshot.board)
         self._render_status(snapshot)
@@ -139,7 +153,7 @@ class GameView(GameViewPort):
             return ""
         return self.reset_button.cget("text")
 
-    def _render_board(self, board: Sequence) -> None:
+    def _render_board(self, board: Sequence[Optional[Player]]) -> None:
         for position, button in enumerate(self.buttons):
             cell = board[position]
             if cell is None:
@@ -149,9 +163,11 @@ class GameView(GameViewPort):
 
     def _render_status(self, snapshot: GameSnapshot) -> None:
         text = self._status_message(snapshot)
+        if self.status_label is None:
+            raise RuntimeError("status label is not initialized")
         self.status_label.configure(text=text)
 
-    def _build_fonts(self) -> Dict[str, object]:
+    def _build_fonts(self) -> Dict[str, Any]:
         """Instantiate the CustomTkinter fonts from the config."""
 
         return {
@@ -161,8 +177,8 @@ class GameView(GameViewPort):
             "reset": self._create_font(self.config.fonts.reset),
         }
 
-    def _create_font(self, spec: FontSpec):
-        kwargs = {"size": spec.size}
+    def _create_font(self, spec: FontSpec) -> Any:
+        kwargs: Dict[str, Any] = {"size": spec.size}
         if spec.weight:
             kwargs["weight"] = spec.weight
         return self.ctk.CTkFont(**kwargs)
