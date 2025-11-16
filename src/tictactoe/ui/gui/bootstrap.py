@@ -4,8 +4,11 @@ from __future__ import annotations
 
 import os
 import platform
+import shutil
 import sys
+import tempfile
 from dataclasses import dataclass
+from importlib import resources
 from pathlib import Path
 from tkinter import TclError
 from types import ModuleType
@@ -66,17 +69,58 @@ def create_root(env: CtkEnvironment) -> Tuple[ModuleType, object, CtkEnvironment
         return fallback_env.module, fallback_env.module.CTk(), fallback_env
 
 
+_ICON_CACHE: Optional[Path] = None
+
+
 def locate_icon_file() -> Optional[Path]:
-    """Find the favicon in either the source tree or installed package."""
+    """Resolve the favicon path from source or installed package data."""
 
-    candidates = [
-        Path(__file__).parent.parent.parent / "assets" / "favicon.ico",
-        Path(sys.prefix) / "Lib" / "site-packages" / "tictactoe" / "assets" / "favicon.ico",
-    ]
+    global _ICON_CACHE
 
-    for candidate in candidates:
-        if candidate.exists():
-            return candidate
+    if _ICON_CACHE and _ICON_CACHE.exists():
+        return _ICON_CACHE
+
+    source_candidate = Path(__file__).resolve().parent.parent.parent / "assets" / "favicon.ico"
+    if source_candidate.exists():
+        _ICON_CACHE = source_candidate
+        return source_candidate
+
+    package_candidate = _locate_package_icon()
+    if package_candidate is not None:
+        _ICON_CACHE = package_candidate
+        return package_candidate
+
+    return None
+
+
+def _locate_package_icon() -> Optional[Path]:
+    """Locate the icon via importlib.resources for installed packages."""
+
+    try:
+        icon_resource = resources.files("tictactoe") / "assets" / "favicon.ico"
+    except ModuleNotFoundError:
+        return None
+
+    try:
+        icon_path = Path(icon_resource)
+        if icon_path.exists():
+            return icon_path
+    except TypeError:
+        pass
+
+    try:
+        with resources.as_file(icon_resource) as extracted_path:
+            extracted = Path(extracted_path)
+            if not extracted.exists():
+                return None
+            temp_dir = Path(tempfile.gettempdir()) / "tictactoe"
+            temp_dir.mkdir(parents=True, exist_ok=True)
+            temp_path = temp_dir / "favicon.ico"
+            shutil.copyfile(extracted, temp_path)
+            return temp_path
+    except FileNotFoundError:
+        return None
+
     return None
 
 
