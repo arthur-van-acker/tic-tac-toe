@@ -45,11 +45,13 @@ pip install -e .
 pip install -r requirements.txt
 ```
 
-3. (Optional) Pin GUI tests to headless mode to avoid real Tk dependencies:
+3. (Optional) Pin GUI tests to headless mode to avoid real Tk dependencies or
+    force a specific frontend during smoke tests:
 
 ```pwsh
 $env:TICTACTOE_HEADLESS = "1"   # PowerShell
 # export TICTACTOE_HEADLESS=1   # bash/zsh
+$env:TICTACTOE_UI = "cli"       # Force the terminal client for scripted checks
 ```
 
 4. Verify tooling versions:

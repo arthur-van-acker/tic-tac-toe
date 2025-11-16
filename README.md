@@ -129,6 +129,33 @@ python -m tictactoe
 tictactoe
 ```
 
+#### Choose a Frontend
+
+`python -m tictactoe` now acts as a thin dispatcher so template users can plug in
+different interfaces without forking the entry point. Pick a frontend at runtime:
+
+```bash
+# Launch the CustomTkinter GUI (default)
+python -m tictactoe --ui gui
+
+# Launch the terminal client
+python -m tictactoe --ui cli
+
+# List every registered frontend
+python -m tictactoe --list-frontends
+```
+
+Environment variables offer zero-touch overrides for installers or CI:
+
+| Variable | Accepted values | Notes |
+| --- | --- | --- |
+| `TICTACTOE_UI` | `gui`, `cli`, `headless` | Forces a frontend when no flag is provided. |
+| `TICTACTOE_HEADLESS` | `0` / `1` | Still respected by the GUI to load the shim widgets in tests. |
+
+Setting `TICTACTOE_UI=headless` automatically flips `TICTACTOE_HEADLESS=1`, which is
+useful for CI smoke tests that still exercise the GUI bootstrap path without a Tk
+runtime.
+
 #### Build Distribution
 
 ```bash

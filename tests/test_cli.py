@@ -5,6 +5,8 @@ import os
 
 import pytest
 
+from tictactoe.ui.cli import main as cli_main
+
 
 def _reload_cli_module():
     return reload(import_module("tictactoe.__main__"))
@@ -78,3 +80,25 @@ def test_cli_rejects_unknown_frontend(monkeypatch):
         cli_module.main([])
 
     assert "Unknown frontend" in str(excinfo.value)
+
+
+def test_cli_script_mode_prints_board(capsys):
+    result = cli_main.main(["--script", "0,3,4,6,8"])
+
+    output = capsys.readouterr().out
+    assert "Winner: X" in output
+    assert "0 | 1 | 2" not in output  # board should show marks instead of index
+    assert result == 0
+
+
+def test_cli_script_invalid_move(monkeypatch):
+    with pytest.raises(SystemExit) as excinfo:
+        cli_main.main(["--script", "0,9"])
+
+    assert "Moves must be between" in str(excinfo.value)
+
+
+def test_cli_script_quiet_suppresses_output(capsys):
+    cli_main.main(["--script", "0,3,4,6,8", "--quiet"])
+    output = capsys.readouterr().out
+    assert output.strip() == ""
