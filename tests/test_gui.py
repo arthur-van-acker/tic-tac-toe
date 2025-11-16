@@ -10,8 +10,8 @@ os.environ.setdefault("TICTACTOE_HEADLESS", "1")
 
 import pytest
 
-from tictactoe.domain.logic import GameState
-from tictactoe.ui.gui.main import TicTacToeGUI
+from tictactoe.domain.logic import GameState, TicTacToe
+from tictactoe.ui.gui.main import TicTacToeGUI, WindowConfig
 
 NEEDS_DISPLAY = platform.system() != "Windows" and not os.environ.get("DISPLAY")
 
@@ -28,10 +28,10 @@ TK_MISSING_PATTERNS = (
 )
 
 
-def _create_app_or_skip() -> TicTacToeGUI:
+def _create_app_or_skip(**kwargs) -> TicTacToeGUI:
     _skip_if_no_display()
     try:
-        return TicTacToeGUI()
+        return TicTacToeGUI(**kwargs)
     except TclError as exc:
         message = str(exc).lower()
         if any(pattern in message for pattern in TK_MISSING_PATTERNS):
@@ -88,5 +88,61 @@ def test_gui_win_updates_status_message():
 
         assert app.game.state == GameState.X_WON
         assert "wins" in app.status_label.cget("text")
+    finally:
+        app.root.destroy()
+
+
+@pytest.mark.gui
+def test_gui_accepts_custom_factories_and_window_config():
+    class DummyWidget:
+        def __init__(self):
+            self._text = ""
+            self._state = "normal"
+
+        def cget(self, key: str):
+            if key == "text":
+                return self._text
+            if key == "state":
+                return self._state
+            raise KeyError(key)
+
+    class DummyView:
+        def __init__(self, **kwargs):
+            self.kwargs = kwargs
+            self.title_label = DummyWidget()
+            self.status_label = DummyWidget()
+            self.board_frame = object()
+            self.reset_button = DummyWidget()
+            self.buttons = [DummyWidget() for _ in range(9)]
+            self.render_calls = []
+
+        def build(self):
+            return None
+
+        def render(self, snapshot):
+            self.render_calls.append(snapshot)
+
+    factory_calls = []
+
+    def game_factory():
+        factory_calls.append("called")
+        return TicTacToe()
+
+    custom_config = WindowConfig(
+        title="Custom Title",
+        geometry="420x640",
+        resizable=(True, False),
+    )
+
+    app = _create_app_or_skip(
+        game_factory=game_factory,
+        view_factory=lambda **kwargs: DummyView(**kwargs),
+        window_config=custom_config,
+    )
+    try:
+        assert factory_calls == ["called"]
+        assert isinstance(app.view, DummyView)
+        assert app.view.render_calls  # render invoked with snapshot
+        assert app.window_config == custom_config
     finally:
         app.root.destroy()
