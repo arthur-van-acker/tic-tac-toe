@@ -79,13 +79,11 @@ After installation, you have two ways to launch the game:
 1. Locate the **"Tic Tac Toe"** icon on your desktop
 2. **Double-click** the icon to launch the game
 
-### Method 2: Command Line
+### Method 2: Command Line (Frontend Picker)
 
-> **Note:** Since the game is installed in an isolated virtual environment, the command-line method won't work unless you activate the virtual environment first. **Use the desktop shortcut instead** (recommended).
+> **Heads up:** The command-line launcher respects the same isolated virtual environment as the desktop shortcut, so remember to activate `.venv` first. The shortcut is still the fastest way to reach the GUI, but the CLI gives you extra control when scripting or testing.
 
-If you need to run from command line:
-
-1. Open Command Prompt
+1. Open PowerShell or Command Prompt
 2. Navigate to the installation folder:
    ```
    cd %LOCALAPPDATA%\Programs\ttt.v0.1.0
@@ -94,10 +92,31 @@ If you need to run from command line:
    ```
    .venv\Scripts\activate
    ```
-4. Run the game:
+4. Inspect the available frontends (GUI, CLI, headless):
    ```
-   python -m tictactoe
+   python -m tictactoe --list-frontends
    ```
+5. Launch the frontend you want:
+   ```
+   python -m tictactoe --ui gui      # CustomTkinter desktop (default)
+   python -m tictactoe --ui cli      # Terminal experience
+   python -m tictactoe --ui headless # GUI rendered with the shim for CI smoke tests
+   ```
+6. Need to automate the CLI? Call it directly so you can pass CLI-only switches:
+   ```
+   python -m tictactoe.ui.cli.main --script 0,4,8 --quiet
+   ```
+
+#### Environment Overrides
+
+Set these variables before launching if you prefer zero-touch automation (PowerShell syntax shown):
+
+| Variable | Purpose | Example |
+| --- | --- | --- |
+| `TICTACTOE_UI` | Forces the default frontend when `--ui` is omitted. | `$env:TICTACTOE_UI = "cli"` |
+| `TICTACTOE_HEADLESS` | Tells the GUI bootstrapper to load shim widgets (no Tk required). Automatically set to `1` when you choose the `headless` frontend. | `$env:TICTACTOE_HEADLESS = "1"` |
+
+Unset the variables (or close the terminal) to return to the desktop default.
 
 ## Troubleshooting
 
