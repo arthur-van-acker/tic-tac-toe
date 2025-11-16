@@ -3,7 +3,7 @@
 A modern, fully-featured Tic Tac Toe game built with Python and CustomTkinter. This project serves as a **comprehensive template for Python GUI applications**, demonstrating best practices for project structure, packaging, distribution, and installation.
 
 ![Python Version](https://img.shields.io/badge/python-3.8%2B-blue)
-![License](https://img.shields.io/badge/license-MIT-green)
+![License](https://img.shields.io/badge/license-0BSD-green)
 ![Platform](https://img.shields.io/badge/platform-Windows-lightgrey)
 
 ---
@@ -395,7 +395,7 @@ This is a template project, but improvements are welcome!
 
 ## 📝 License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the Zero-Clause BSD License (0BSD) - see the [LICENSE](LICENSE) file for details.
 
 ---
 
@@ -468,7 +468,7 @@ Potential improvements for this template:
 ## ❓ FAQ
 
 **Q: Can I use this for commercial projects?**
-A: Yes! MIT License allows commercial use.
+A: Yes. The 0BSD License places almost no restrictions on redistribution or commercial use.
 
 **Q: Does this work on Linux/Mac?**
 A: The installer is Windows-specific, but the code runs on any platform. You'd need to create platform-specific installers.

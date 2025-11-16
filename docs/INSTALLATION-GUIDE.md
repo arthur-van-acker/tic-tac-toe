@@ -182,7 +182,7 @@ If you want to manually clean up old installations or versions installed differe
 
 ### When to Uninstall
 
-You only need to manually uninstall if you want to **completely remove** the game from your system. 
+You only need to manually uninstall if you want to **completely remove** the game from your system.
 
 **Note:** If you're updating to a newer version, you don't need to uninstall - just run the new installer and it will automatically replace the old version.
 
@@ -231,7 +231,7 @@ If you encounter any issues not covered in this guide:
 - **Version:** 0.1.0
 - **Installation Size:** ~50 MB (including virtual environment and dependencies)
 - **Isolation:** Installed in its own virtual environment - won't affect other Python packages
-- **License:** MIT License
+- **License:** Zero-Clause BSD (0BSD)
 
 ---
 
